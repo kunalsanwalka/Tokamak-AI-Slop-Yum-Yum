@@ -1,6 +1,6 @@
 # Tokamak plasma shapes, 1:100
 
-Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 7 tokamaks at 1:100 scale: 1 m on the real machine = 10 mm on the model. All STEP and STL files are in millimetres.
+Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 7 tokamaks, plus the WHAM magnetic mirror, at 1:100 scale: 1 m on the real machine = 10 mm on the model. All STEP and STL files are in millimetres. WHAM is described in its own section below.
 
 ## Shapes
 
@@ -74,6 +74,40 @@ Top-view renders are in `verification/<MACHINE>_named_topview.png`.
 
 **Printing:** print upright, with the machine axis vertical and the letters facing up. The torus has no flat face to sit on; it rests on its lowest ring. So either use supports under the lower half (tree supports work well), or cut it in the slicer, for example at Z = 0, and print the upper half lettering-up. NSTX-U's 2.8 mm letters have strokes about 0.55 mm wide, so a 0.4 mm nozzle and 0.12–0.16 mm layers are recommended for that one.
 
+## WHAM (Wisconsin HTS Axisymmetric Mirror), `build_wham_solidworks.ps1` (`WhamTrace.cs` + `WhamSw.cs`)
+**Source.** The pink plasma is digitised from Fig. 2 of Endrizzi et al. 2023 (`../reference_figures/WHAM_fig.png`).
+- **Scale:** the tick marks give 428.4 px/m along Z and 428.9 px/m across, so the figure is drawn at equal scale.
+- **Folding:** the plasma is axisymmetric and symmetric about Z = 0, so the top and bottom edges of both halves are pooled and median-filtered.
+
+**Tracing.**
+- **Central cell:** the plasma is drawn with a soft edge, so the boundary is taken at half the local pink intensity.
+- **Mirror throats:** the pink fills the bore, so the boundary there is the vessel wall.
+- **Expander fans:** these have hard edges.
+- **End walls:** each fan ends at the red hatched end wall, modelled as a flat disc plus a cone. The left wall is drawn 3 cm further out than the right, so the average is used.
+
+Verification overlay: `verification/WHAM_trace_vs_figure.png`.
+
+| | Real | 1:100 |
+|---|---|---|
+| Plasma radius at the centre | 8.2 cm | 0.82 mm |
+| Radius in the mirror throats (\|Z\| = 0.86–1.09 m) | 2.0 cm | 0.20 mm |
+| Radius at the expander rim | 22.2 cm | 2.22 mm |
+| Total length (end wall to end wall) | 4.14 m | 41.4 mm |
+| Plasma volume | 0.133 m³ | 132.6 mm³ |
+
+**Files.**
+- **`step/WHAM_plasma_1to100.step` and `stl/WHAM_plasma_1to100.stl`:** the full 1:100 solid of revolution.
+  - **Orientation:** the mirror axis is along X and the centre is at the origin.
+  - **Check:** 1 solid, 0 faults; the volume matches the analytic π∫r² dz.
+  - **Printability:** it is about 1.6 mm thick at the centre and 0.4 mm at the throats. That is too thin to print on its own or to carry lettering.
+- **`step_named/WHAM_plaque_named_1to100.step` and `stl_named/...`: the one to print.** It carries the same 1:100 shape:
+  - **Relief:** the half-body (cut along the axis) stands up to 2.2 mm proud of a 48 × 15.5 × 2 mm base.
+  - **Lettering:** "WHAM" is raised 0.8 mm below the relief, in 5 mm Arial Black.
+  - **Check:** 1 solid, 0 faults.
+  - **Printing:** print it flat, base down, with no supports.
+  - **Renders:** `verification/WHAM_named_topview.png` and `verification/WHAM_named_isoview.png`.
+- **`comparison_cross_sections.svg`:** WHAM is drawn at the same scale, lying on its side below the small tokamaks. Run the WHAM script after `Build.Run` to put it back after regenerating.
+
 ## STEP validation (SolidWorks import, `check_step_solidworks.ps1`)
 | File | Solid bodies | Faces | Check faults | Volume in SolidWorks (mm³) | Analytic (mm³) |
 |---|---|---|---|---|---|
@@ -95,6 +129,7 @@ Analytic volume = 2π × (centroid R) × (cross-section area), at 1:100 (1 m³ r
 - SPARC: A.J. Creely et al., "Overview of the SPARC tokamak", J. Plasma Phys. 86 (2020) 865860502, Fig. 2.
 - ITER (separatrix κ 1.85, δ 0.49): ITER-FEAT design parameters, https://fire.pppl.gov/iter_feat_optimize.pdf
 - ARC V3A (R0 4.62, a 1.18, κsep 1.8, δsep 0.65): arXiv 2606.09359 (Table 1) and arXiv 2608.10124.
+- WHAM: D. Endrizzi et al., "Physics basis for the Wisconsin HTS Axisymmetric Mirror (WHAM)", J. Plasma Phys. 89 (2023) 975890501, Fig. 2.
 
 ## Regenerating
 From the `Tokamak Comparison` folder, in Windows PowerShell:
@@ -103,3 +138,5 @@ Add-Type -Path tokamak_models\TokamakGen.cs,tokamak_models\Trace.cs,tokamak_mode
 [Build]::Run((Get-Location).Path)
 ```
 `tokamak_models\check_step_solidworks.ps1` opens every STEP file in SolidWorks and reports body count, face count and volume.
+
+`tokamak_models\build_wham_solidworks.ps1` re-traces WHAM, rebuilds its solid and plaque in SolidWorks, and adds it to the SVG.
