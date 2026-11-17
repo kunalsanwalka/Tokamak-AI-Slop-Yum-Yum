@@ -87,13 +87,18 @@ public static class Emboss
         return res;
     }
 
-    public static string Run(string root, bool visible)
+    public static string Run(string root, bool visible) { return Run(root, visible, null); }
+
+    // only: a single machine name (e.g. "NSTX-U") to re-letter just that one; null/empty = all
+    public static string Run(string root, bool visible, string only)
     {
         var names = new[] { "WEST", "EAST", "DIII-D", "SPARC", "ITER", "ARC", "NSTX-U" };
         var heights = new Dictionary<string, double> { { "WEST", 4 }, { "EAST", 4 }, { "DIII-D", 4 }, { "SPARC", 4 }, { "ITER", 8 }, { "ARC", 6 }, { "NSTX-U", 2.8 } };
-        // NSTX-U's top ring is tiny (crown at R ~ 7 mm); at the flattest band the name would wrap ~180 deg round the
-        // hole and SolidWorks mis-sizes letters rotated beyond ~60 deg. Put it further out, where the arc is gentler.
-        var rcOverride = new Dictionary<string, double> { { "NSTX-U", 11.0 } };
+        // NSTX-U's top ring is tiny (crown at R ~ 7.6 mm); at the flattest band the name would wrap ~180 deg round the
+        // hole and SolidWorks mis-sizes letters rotated beyond ~60 deg. Put it just outboard of the crown (R = 10 mm),
+        // where the end letters turn ~42 deg and the surface under the text drops ~2.1 mm.
+        var rcOverride = new Dictionary<string, double> { { "NSTX-U", 10.0 } };
+        if (!string.IsNullOrEmpty(only)) names = Array.FindAll(names, x => x.Replace("-", "").Equals(only.Replace("-", ""), StringComparison.OrdinalIgnoreCase));
         string md = Path.Combine(root, "tokamak_models");
         string stepIn = Path.Combine(md, "step"), outStep = Path.Combine(md, "step_named"), outStl = Path.Combine(md, "stl_named"), outImg = Path.Combine(md, "verification");
         Directory.CreateDirectory(outStep); Directory.CreateDirectory(outStl); Directory.CreateDirectory(outImg);

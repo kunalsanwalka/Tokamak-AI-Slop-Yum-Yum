@@ -1,7 +1,7 @@
 ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('ITER plasma boundary (LCFS) solid of revolution, 1:100 scale, mm'),'2;1');
-FILE_NAME('ITER_plasma_1to100.step','2026-11-16T16:33:01',(''),(''),'TokamakGen','TokamakGen','');
+FILE_NAME('ITER_plasma_1to100.step','2026-11-17T15:46:43',(''),(''),'TokamakGen','TokamakGen','');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
 ENDSEC;
 DATA;

@@ -406,7 +406,7 @@ public static class Build
             var raw = Trace.Run(f, 0.25);
             var pts = new List<double[]>(); foreach (var p in raw) pts.Add(new[] { p[0], p[1] });
             var hints = new List<double[]>(); foreach (var h in f.XHints) hints.Add(new[] { f.R(h[0]), f.Z(h[1]) });
-            var pr = FromPoints(f.Name, pts, hints, true, f.Source, "digitised;", 40);
+            var pr = FromPoints(f.Name, pts, hints, !f.XExact, f.Source, "digitised;", 40);
             profiles.Add(pr); overlays.Add(new KeyValuePair<Fig, Profile>(f, pr));
         }
         // parametric model for machines without a reference figure

@@ -19,6 +19,7 @@ public class Fig
     public double HalfWidthPx = -1;        // >0: boundary = first hit + this (when the line touches other features); else run midpoint
     public List<double[]> MaskSegs = new List<double[]>(); // x0,y0,x1,y1,halfwidth : annotation arrows to ignore
     public List<double[]> XHints = new List<double[]>();   // approximate X-point pixels
+    public bool XExact = false;            // true: XHints are the known X-points (e.g. printed by the equilibrium code), not refined
     public double R(double x) { return Ax + Bx * x; }
     public double Z(double y) { return Az + Bz * y; }
 }
@@ -34,6 +35,7 @@ public static class Trace
             case "purered": return c.R > 200 && c.G < 70 && c.B < 70;
             case "pink": return c.R > 190 && c.G < 75 && c.B > 95 && c.B < 185; // core (230,30,130); excludes red line's anti-aliasing
             case "cyan": return c.G > 170 && c.B > 170 && c.R < 170;
+            case "viridis0": return c.R < 130 && c.G < 60 && c.B > 60 && c.B < 150 && c.B - c.G > 50; // matplotlib viridis low end (68,1,84)
         }
         return false;
     }

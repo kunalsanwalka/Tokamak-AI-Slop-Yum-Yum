@@ -12,9 +12,19 @@ Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 7 tokam
 | SPARC  | digitised: Creely et al. 2020, Fig. 2 | 1.847 | 0.564 | 2.01 | 0.54 / 0.54 | upper + lower | 20.1 m³ | 48.2 × 22.7 |
 | ITER   | parametric model | 6.200 | 2.000 | 1.85 | 0.49 / 0.49 | lower | 809 m³ | 164 × 74 |
 | ARC (V3A) | parametric model | 4.620 | 1.180 | 1.80 | 0.65 / 0.65 | upper + lower (assumed) | 202 m³ | 116 × 42.5 |
-| NSTX-U | digitised: Pajares et al. 2025, t = 325 ms | 0.914 | 0.583 | 1.73 | 0.39 / 0.51 | lower | 9.2 m³ | 29.9 × 20.5 |
+| NSTX-U | digitised: TokaMaker equilibrium (Matthew Parsons) | 0.934 | 0.564 | 2.16 | 0.31 / 0.57 | lower | 11.3 m³ | 30.0 × 24.4 |
 
-For the digitised machines, R0, a, κ and δ are measured from the traced shape. They describe that particular equilibrium, not the machine's design limits. The WEST discharge in the capabilities figure is smaller than the nominal a = 0.5 m, and the DIII-D and NSTX-U shapes are ramp-up shapes.
+For the digitised machines, R0, a, κ and δ are measured from the traced shape. They describe that particular equilibrium, not the machine's design limits. The WEST discharge in the capabilities figure is smaller than the nominal a = 0.5 m, and the DIII-D shape is a ramp-up shape.
+
+NSTX-U is a fully shaped, lower-single-null, 1 MA equilibrium solved with TokaMaker within the coil current limits. It is a designed scenario, not a measured shot. Its traced shape agrees with the notebook's own printout:
+
+| | Notebook printout | Traced shape |
+|---|---|---|
+| κ | 2.153 | 2.16 |
+| δ upper / lower | 0.305 / 0.566 | 0.31 / 0.57 |
+| Volume | 11.33 m³ | 11.31 m³ |
+
+The previous NSTX-U shape (Pajares et al. 2025, t = 325 ms ramp-up, κ 1.73, 9.2 m³) is kept in `archive_NSTXU_Pajares2025/`.
 
 ## Files
 - `step_named/<MACHINE>_plasma_named_1to100.step` and `stl_named/<MACHINE>_plasma_named_1to100.stl`: the full solid with the device name raised on the top. **These are the ones to print.** Details are in the "Name lettering" section below.
@@ -32,11 +42,11 @@ For the digitised machines, R0, a, κ and δ are measured from the traced shape.
    - **WEST:** 326.5 / 326.75 px per m.
    - **SPARC:** 145.4 / 145.4 px per m.
    - **DIII-D:** 267 / 271 px per m. The Z ticks in that figure are unevenly spaced (±7 px), so a least-squares fit is used; the remaining error is about ±2.5 cm at real scale (±0.25 mm on the model).
-   - **NSTX-U:** the panel has no Z axis, so equal aspect is assumed, with Z = 0 at the vertical centre of the machine drawing.
+   - **NSTX-U:** 182.5 / 182.25 px per m, from the saved separatrix plot in `NSTXU_shape_generator.ipynb` (cell 31).
 2. **Tracing.** Rays are cast outward from inside the plasma every 0.25°. The boundary point is the centre of the first boundary-coloured line each ray meets:
    - **EAST:** black.
    - **DIII-D:** the pink dashed 0.32 s line.
-   - **NSTX-U:** the thick cyan line.
+   - **NSTX-U:** the dark-purple separatrix line.
    - **WEST and SPARC:** red.
    
    Rays are blocked beyond the X-points (so divertor legs are ignored) and on annotation arrows. Outliers are rejected against a running median.
@@ -46,8 +56,9 @@ For the digitised machines, R0, a, κ and δ are measured from the traced shape.
    - each X-point (a sharp corner).
    
    Each piece is fitted with a least-squares cubic B-spline. Its smoothing is raised only until the piece's deepest inward dent is under 0.5 mm at real scale (5 µm on the model), so the outlines are convex to within print resolution.
-   - **Fit error:** 1–3 mm RMS at real scale (≤ 0.03 mm on the model), or about 6 mm for the low-resolution NSTX-U image.
-   - **Worst point:** under 13 mm (0.13 mm on the model) for every machine except NSTX-U, where it is 29 mm.
+   - **Fit error:** 1–3.2 mm RMS at real scale (≤ 0.03 mm on the model).
+   - **Worst point:** under 14 mm (0.14 mm on the model) for every machine.
+   - **NSTX-U X-point:** fixed at TokaMaker's printed value (0.615, −1.322) instead of being refined from the trace.
 5. **ITER and ARC** have no reference figure, so they use the parametric model from v2 (Miller form for the rounded half, conic arcs fitted to SPARC for the X-point halves). Those are then fitted the same way.
 
 ## Name lettering (`emboss_names_solidworks.ps1` + `Emboss.cs`, run in SolidWorks)
@@ -56,7 +67,7 @@ For the digitised machines, R0, a, κ and δ are measured from the traced shape.
 - Letters extend straight down into the body and are merged with it, giving one solid body.
 - The text sits on the band of the top surface where the surface drops least across the letter height.
 - **SPARC and ARC:** these have an X-point ridge on top, so their text sits just outboard of the ridge.
-- **NSTX-U:** its crown ring is tiny (R ≈ 7 mm at 1:100), so its text is moved out to R = 11 mm. There the name spans about 100° of arc instead of wrapping around the hole.
+- **NSTX-U:** its crown ring is tiny (R ≈ 7.6 mm at 1:100), so its text is moved just outboard, to R = 10 mm. There the end letters turn about 42° instead of the name wrapping around the hole.
 
 | Machine | Cap height (mm) | Text radius (mm) | Letter-top Z (mm) | Max surface drop under text (mm) |
 |---|---|---|---|---|
@@ -66,7 +77,7 @@ For the digitised machines, R0, a, κ and δ are measured from the traced shape.
 | SPARC  | 4   | 16.6 | 12.15 | 2.17 |
 | ITER   | 8   | 52.4 | 37.80 | 1.19 |
 | ARC    | 6   | 40.7 | 22.03 | 2.45 |
-| NSTX-U | 2.8 | 11.0 | 10.26 | 2.53 |
+| NSTX-U | 2.8 | 10.0 | 11.82 | 2.08 |
 
 Re-import check of `step_named/`: every file is 1 solid body with 0 geometry faults.
 
@@ -117,14 +128,25 @@ Verification overlay: `verification/WHAM_trace_vs_figure.png`.
 | SPARC  | 1 | 8 | 0 | 20 100  | 20 099  |
 | ITER   | 1 | 6 | 0 | 808 588 | 808 590 |
 | ARC    | 1 | 8 | 0 | 202 277 | 202 249 |
-| NSTX-U | 1 | 6 | 0 | 9 198   | 9 197   |
+| NSTX-U | 1 | 6 | 0 | 11 311  | 11 312  |
 
 Analytic volume = 2π × (centroid R) × (cross-section area), at 1:100 (1 m³ real = 1000 mm³).
+
+## Acknowledgements
+Many thanks to **Matthew Parsons** for providing the correct NSTX-U plasma shape and the files to generate it:
+- `parsons_files/NSTXU_shape_generator.ipynb`: a TokaMaker NSTX-U shape generator and control-point selector.
+- `parsons_files/omfit_shape_generator.py`: the OMFIT `boundaryShape` generator.
+
+The NSTX-U model in this set is built from his equilibrium.
 
 ## Sources
 - EAST: Y.-Y. Chen et al., "Plasma shape optimization for EAST tokamak using orthogonal method", Chin. Phys. B 28 (2019) 015201, Fig. 1. (`EAST_paper.pdf`)
 - DIII-D: G.L. Jackson et al., "Simulating ITER plasma startup and rampdown scenarios in the DIII-D tokamak", Nucl. Fusion 49 (2009) 115027, Fig. 1(b), 0.32 s. (`DIIID_paper.pdf`)
-- NSTX-U: A. Pajares et al., "Plasma shape and position control development for NSTX-U using the GSEvolve plasma simulator", Fus. Eng. Des. 220 (2025) 115302, panel (i), t = 325 ms. (`NSTXU_paper.pdf`)
+- NSTX-U: TokaMaker (OpenFUSIONToolkit) free-boundary LSN equilibrium from Matthew Parsons, `parsons_files/NSTXU_shape_generator.ipynb`:
+  - **Inputs:** Ip 1 MA; target shape from the OMFIT `boundaryShape` (Luce 2013) generator.
+  - **Figure used:** the saved plot is `../reference_figures/NSTXU_TokaMaker_separatrix.png`.
+  - **Not re-run here:** the notebook needs the OFT install and `NSTXU_mesh.h5`.
+  - **Previously used:** A. Pajares et al., Fus. Eng. Des. 220 (2025) 115302, t = 325 ms (`NSTXU_paper.pdf`).
 - WEST: "WEST machine capabilities for 2024" (CEA), p. 1 figure. (`WEST_paper.pdf`)
 - SPARC: A.J. Creely et al., "Overview of the SPARC tokamak", J. Plasma Phys. 86 (2020) 865860502, Fig. 2.
 - ITER (separatrix κ 1.85, δ 0.49): ITER-FEAT design parameters, https://fire.pppl.gov/iter_feat_optimize.pdf
@@ -138,5 +160,7 @@ Add-Type -Path tokamak_models\TokamakGen.cs,tokamak_models\Trace.cs,tokamak_mode
 [Build]::Run((Get-Location).Path)
 ```
 `tokamak_models\check_step_solidworks.ps1` opens every STEP file in SolidWorks and reports body count, face count and volume.
+
+`tokamak_models\emboss_names_solidworks.ps1` re-letters every machine; add `-Only NSTX-U` to re-letter one.
 
 `tokamak_models\build_wham_solidworks.ps1` re-traces WHAM, rebuilds its solid and plaque in SolidWorks, and adds it to the SVG.

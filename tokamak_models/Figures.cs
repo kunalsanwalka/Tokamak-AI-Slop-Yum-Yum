@@ -29,13 +29,19 @@ public static class Figures
         d3d.XHints.Add(new double[] { 967, 719 });
         list.Add(d3d);
 
-        // NSTX-U: Pajares et al. 2025 Fus. Eng. Des. 220 115302, panel (i) t = 325 ms. R ticks 0/1/2 at x=17/176/335.5.
-        // No Z axis in the panel: equal aspect assumed, Z = 0 at the vertical centre of the machine drawing (y = 380).
-        var nstx = new Fig { Name = "NSTX-U", Path = d + "NSTXU_fig.png", Pred = "cyan", Thick = 18, Source = "Pajares et al. 2025, Fus. Eng. Des. 220 115302, t = 325 ms",
-            Bx = 1 / 159.25, Bz = -1 / 159.25 };
-        nstx.Ax = -17 * nstx.Bx; nstx.Az = -380 * nstx.Bz;
-        nstx.Cx = 160.3; nstx.Cy = 372; nstx.YMax = 534; nstx.HalfWidthPx = 2.5; // cyan line ~5 px wide
-        nstx.XHints.Add(new double[] { 115, 531 });
+        // NSTX-U: TokaMaker free-boundary LSN equilibrium (M. Parsons, NSTXU_shape_generator.ipynb, saved plot of cell 31;
+        // Ip 1 MA, CS 18 kA). R ticks 0/0.5/1/1.5/2 at x = 81.5/172.5/263.5/354.5/446.5, Z ticks 2/1/0/-1/-2 at
+        // y = 116.5/298.5/481.5/663.5/845.5 -> 182.5 x 182.25 px/m. Separatrix = dark viridis line (68,1,84).
+        // The X-point is fixed at the solver's printed value (0.615, -1.322); the notebook printout gives
+        // kappa 2.153 (U 2.021, L 2.284), delta U 0.305 / L 0.566, volume 11.332 m3 for checking.
+        // (Previous source: Pajares et al. 2025 Fus. Eng. Des. 220 115302, t = 325 ms ramp-up shape, NSTXU_fig.png.)
+        var nstx = new Fig { Name = "NSTX-U", Path = d + "NSTXU_TokaMaker_separatrix.png", Pred = "viridis0",
+            Source = "TokaMaker LSN equilibrium, M. Parsons NSTXU_shape_generator.ipynb", Bx = 1 / 182.5, Bz = -1 / 182.25 };
+        nstx.Ax = -81.5 * nstx.Bx; nstx.Az = 481.5 / 182.25;
+        nstx.Cx = 81.5 + 0.80 * 182.5; nstx.Cy = 481.5 - 0.25 * 182.25;   // inside the plasma, off the control segments
+        nstx.YMax = 481.5 + 1.326 * 182.25;                                 // block the divertor legs below the X-point
+        nstx.YMin = 481.5 - 1.30 * 182.25;                                  // block the private-flux loop above the top
+        nstx.XHints.Add(new double[] { 81.5 + 0.615 * 182.5, 481.5 + 1.322 * 182.25 }); nstx.XExact = true;
         list.Add(nstx);
 
         // WEST: WEST machine capabilities 2024, page 1 figure. Label centres: R 1.5..3.5 at x=241..894, Z 1..-1 at y=25..679.
