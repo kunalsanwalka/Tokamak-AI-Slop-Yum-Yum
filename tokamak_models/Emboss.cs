@@ -92,8 +92,9 @@ public static class Emboss
     // only: a single machine name (e.g. "NSTX-U") to re-letter just that one; null/empty = all
     public static string Run(string root, bool visible, string only)
     {
-        var names = new[] { "WEST", "EAST", "DIII-D", "SPARC", "ITER", "ARC", "NSTX-U" };
-        var heights = new Dictionary<string, double> { { "WEST", 4 }, { "EAST", 4 }, { "DIII-D", 4 }, { "SPARC", 4 }, { "ITER", 8 }, { "ARC", 6 }, { "NSTX-U", 2.8 } };
+        var names = new[] { "WEST", "EAST", "DIII-D", "SPARC", "ITER", "ARC", "NSTX-U", "JET", "JT-60U" };
+        var heights = new Dictionary<string, double> { { "WEST", 4 }, { "EAST", 4 }, { "DIII-D", 4 }, { "SPARC", 4 }, { "ITER", 8 }, { "ARC", 6 }, { "NSTX-U", 2.8 },
+            { "JET", 5 }, { "JT-60U", 5 } };
         // NSTX-U's top ring is tiny (crown at R ~ 7.6 mm); at the flattest band the name would wrap ~180 deg round the
         // hole and SolidWorks mis-sizes letters rotated beyond ~60 deg. Put it just outboard of the crown (R = 10 mm),
         // where the end letters turn ~42 deg and the surface under the text drops ~2.1 mm.
@@ -124,7 +125,14 @@ public static class Emboss
                 var d = DropAt(Path.Combine(md, "csv", tag + "_boundary.csv"), rcOverride[name], h);
                 band = new[] { rcOverride[name], d[0], d[1] };
             }
-            double rc = band[0], zTop = band[1] + RaiseMm, depth = band[2] + RaiseMm + SinkMm;
+            // Letter tops sit RaiseMm above the higher of (a) the surface under the text and (b) the top of the plasma,
+            // so a single filament change at the plasma's top layer colours only the lettering. For text placed on the
+            // crown these are the same; for NSTX-U (text outboard of a tiny crown) (b) is higher.
+            double zPlasmaTop = -1e9; foreach (var q in prof) zPlasmaTop = Math.Max(zPlasmaTop, q[1]);
+            double zUnderMin = band[1] - band[2];
+            double rc = band[0], zTop = Math.Max(band[1], zPlasmaTop) + RaiseMm, depth = zTop - zUnderMin + SinkMm;
+            log.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0}: plasma top Z={1:0.00} mm, surface under text {2:0.00}..{3:0.00} mm, letter tops Z={4:0.00} mm",
+                name, zPlasmaTop, zUnderMin, band[1], zTop));
             int err = 0, warn = 0;
             string f = Path.Combine(stepIn, tag + "_plasma_1to100.step");
             var doc = (ModelDoc2)sw.LoadFile4(f, "r", sw.GetImportFileData(f), ref err);

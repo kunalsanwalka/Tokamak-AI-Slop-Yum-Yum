@@ -20,6 +20,8 @@ public class Fig
     public List<double[]> MaskSegs = new List<double[]>(); // x0,y0,x1,y1,halfwidth : annotation arrows to ignore
     public List<double[]> XHints = new List<double[]>();   // approximate X-point pixels
     public bool XExact = false;            // true: XHints are the known X-points (e.g. printed by the equilibrium code), not refined
+    public int NthRun = 0;                 // >0: figure draws nested flux surfaces; boundary = inner edge of the Nth line crossed + HalfWidthPx
+    public string BridgePred = null;       // colour (e.g. overlaid dashed contours / labels) that may interrupt a line without ending it
     public double R(double x) { return Ax + Bx * x; }
     public double Z(double y) { return Az + Bz * y; }
 }
@@ -35,6 +37,7 @@ public static class Trace
             case "purered": return c.R > 200 && c.G < 70 && c.B < 70;
             case "pink": return c.R > 190 && c.G < 75 && c.B > 95 && c.B < 185; // core (230,30,130); excludes red line's anti-aliasing
             case "cyan": return c.G > 170 && c.B > 170 && c.R < 170;
+            case "brown": return c.R > 140 && c.R - c.G > 50 && c.R - c.B > 60;   // dashed ripple contours / labels (~(190,80,50))
             case "viridis0": return c.R < 130 && c.G < 60 && c.B > 60 && c.B < 150 && c.B - c.G > 50; // matplotlib viridis low end (68,1,84)
         }
         return false;
@@ -72,6 +75,7 @@ public static class Trace
             return n >= f.Thick;
         };
         var raw = new List<double[]>(); // angle(rad, in R-Z space), rpx, xpx, ypx
+        var nthStarts = new List<KeyValuePair<double, List<double>>>();
         int nr = (int)Math.Round(360 / stepDeg);
         for (int k = 0; k < nr; k++)
         {
@@ -79,6 +83,22 @@ public static class Trace
             // direction in pixel space: +R -> sign(Bx) x, +Z -> sign(Bz) y
             double dx = Math.Cos(th) * Math.Sign(f.Bx), dy = Math.Sin(th) * Math.Sign(f.Bz);
             double hit = -1, end = -1;
+            if (f.NthRun > 0)
+            {
+                // list every completed line crossing outward (run starts); a run ends after >0.75 px of non-line, non-bridge pixels
+                var starts = new List<double>(); double st = -1, last = -1; bool inRun = false;
+                for (double r = f.RMinPx; r < 2000; r += 0.25)
+                {
+                    int x = (int)Math.Round(f.Cx + r * dx), y = (int)Math.Round(f.Cy + r * dy);
+                    if (x < 0 || y < 0 || x >= W || y >= H || y < f.YMin || y > f.YMax || x < f.XMin || x > f.XMax) break;
+                    bool line = IsPred(f.Pred, px[x, y]);
+                    bool bridge = f.BridgePred != null && IsPred(f.BridgePred, px[x, y]);
+                    if (line) { if (!inRun) { inRun = true; st = r; } last = r; }
+                    else if (inRun && !bridge && r - last > 0.75) { inRun = false; starts.Add(st); }
+                }
+                nthStarts.Add(new KeyValuePair<double, List<double>>(th, starts));
+                continue;
+            }
             for (double r = f.RMinPx; r < 2000; r += 0.25)
             {
                 int x = (int)Math.Round(f.Cx + r * dx), y = (int)Math.Round(f.Cy + r * dy);
@@ -97,9 +117,33 @@ public static class Trace
             double xp = f.Cx + rm * dx, yp = f.Cy + rm * dy;
             raw.Add(new[] { th, rm, xp, yp });
         }
+        if (f.NthRun > 0)
+        {
+            // first guess: the Nth line on each ray. A line hidden under an overlaid contour/label shifts the count by
+            // one over a stretch of rays, so take the running median of the guesses (+-5 deg) as the reference and pick,
+            // on every ray, the line closest to it (accepted within 2.5 px).
+            int n = nthStarts.Count; var guess = new double[n];
+            for (int i = 0; i < n; i++) { var s = nthStarts[i].Value; guess[i] = s.Count >= f.NthRun ? s[f.NthRun - 1] : double.NaN; }
+            int hw = (int)Math.Round(5 / stepDeg);
+            for (int i = 0; i < n; i++)
+            {
+                var v = new List<double>();
+                for (int j = -hw; j <= hw; j++) { double g = guess[(i + j + n) % n]; if (!double.IsNaN(g)) v.Add(g); }
+                if (v.Count < hw) continue;
+                v.Sort(); double refR = v[v.Count / 2];
+                double best = double.NaN, bd = 1e9;
+                foreach (var s in nthStarts[i].Value) if (Math.Abs(s - refR) < bd) { bd = Math.Abs(s - refR); best = s; }
+                if (double.IsNaN(best) || bd > 2.5) continue;
+                double th = nthStarts[i].Key, ddx = Math.Cos(th) * Math.Sign(f.Bx), ddy = Math.Sin(th) * Math.Sign(f.Bz);
+                double rm = best + f.HalfWidthPx;
+                raw.Add(new[] { th, rm, f.Cx + rm * ddx, f.Cy + rm * ddy });
+            }
+        }
         // outlier rejection: (1) vs median of +-3 neighbours, (2) vs median of +-15 neighbours with a looser bound
         var pass1 = Filter(raw, 3, 0.04);
         var pass2 = Filter(pass1, 15, 0.08);
+        // nested-surface figures: a hidden line shifts the count by one line (~5-30 px); reject anything > 3 px off
+        if (f.NthRun > 0) pass2 = Filter(pass2, 8, 0.012);
         var outPts = new List<double[]>();
         foreach (var p in pass2) outPts.Add(new[] { f.R(p[2]), f.Z(p[3]), p[2], p[3] });
         return outPts;

@@ -1,6 +1,6 @@
 # Tokamak plasma shapes, 1:100
 
-Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 7 tokamaks, plus the WHAM magnetic mirror, at 1:100 scale: 1 m on the real machine = 10 mm on the model. All STEP and STL files are in millimetres. WHAM is described in its own section below.
+Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 9 tokamaks, plus the WHAM magnetic mirror, at 1:100 scale: 1 m on the real machine = 10 mm on the model. All STEP and STL files are in millimetres. WHAM is described in its own section below.
 
 ## Shapes
 
@@ -13,8 +13,10 @@ Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 7 tokam
 | ITER   | parametric model | 6.200 | 2.000 | 1.85 | 0.49 / 0.49 | lower | 809 m³ | 164 × 74 |
 | ARC (V3A) | parametric model | 4.620 | 1.180 | 1.80 | 0.65 / 0.65 | upper + lower (assumed) | 202 m³ | 116 × 42.5 |
 | NSTX-U | digitised: TokaMaker equilibrium (Matthew Parsons) | 0.934 | 0.564 | 2.16 | 0.31 / 0.57 | lower | 11.3 m³ | 30.0 × 24.4 |
+| JET    | digitised: de Vries et al. 2009, Fig. 1 (left) | 2.919 | 0.915 | 1.64 | 0.07 / 0.33 | lower | 73.4 m³ | 76.7 × 30.0 |
+| JT-60U | digitised: de Vries et al. 2009, Fig. 1 (right) | 3.383 | 0.850 | 1.55 | 0.11 / 0.30 | lower | 68.7 m³ | 84.7 × 26.3 |
 
-For the digitised machines, R0, a, κ and δ are measured from the traced shape. They describe that particular equilibrium, not the machine's design limits. The WEST discharge in the capabilities figure is smaller than the nominal a = 0.5 m, and the DIII-D shape is a ramp-up shape.
+For the digitised machines, R0, a, κ and δ are measured from the traced shape. They describe that particular equilibrium, not the machine's design limits. The WEST discharge in the capabilities figure is smaller than the nominal a = 0.5 m, and the DIII-D shape is a ramp-up shape. The JET and JT-60U shapes are the matched, low-triangularity shapes from the 2008 JT-60U / JET identity experiments on internal transport barriers. In those experiments JET's TF ripple was set to match JT-60U's.
 
 NSTX-U is a fully shaped, lower-single-null, 1 MA equilibrium solved with TokaMaker within the coil current limits. It is a designed scenario, not a measured shot. Its traced shape agrees with the notebook's own printout:
 
@@ -32,7 +34,7 @@ The previous NSTX-U shape (Pajares et al. 2025, t = 325 ms ramp-up, κ 1.73, 9.2
 - `stl/<MACHINE>_cutaway270_1to100.stl`: 3/4 torus with a 90° wedge removed so the cross-section shows. It stands on its lowest point (needs supports).
 - `stl/<MACHINE>_profile_plate_1to100.stl`: the cross-section extruded 3 mm thick. It prints flat with no supports. x = R, so the plates sit at their true radius from a shared axis.
 - `csv/`: 600–800 boundary points per machine, R and Z in metres and in 1:100 mm.
-- `comparison_cross_sections.svg`: all 7 shapes at true scale on common R and Z axes (same scale on both axes).
+- `comparison_cross_sections.svg`: all 9 tokamak shapes (and WHAM) at true scale on common R and Z axes (same scale on both axes).
 - `verification/<MACHINE>_trace_vs_figure.png`: each source figure with the traced points (green), the fitted boundary (thin black) and the X-points (blue circles) drawn on top.
 - `../reference_figures/`: the figures used for digitising.
 
@@ -43,11 +45,16 @@ The previous NSTX-U shape (Pajares et al. 2025, t = 325 ms ramp-up, κ 1.73, 9.2
    - **SPARC:** 145.4 / 145.4 px per m.
    - **DIII-D:** 267 / 271 px per m. The Z ticks in that figure are unevenly spaced (±7 px), so a least-squares fit is used; the remaining error is about ±2.5 cm at real scale (±0.25 mm on the model).
    - **NSTX-U:** 182.5 / 182.25 px per m, from the saved separatrix plot in `NSTXU_shape_generator.ipynb` (cell 31).
+   - **JET and JT-60U:** 163.45 (JET) and 163.15 (JT-60U) px per m in R, and 154.25 px per m in Z for both. That figure is not drawn at equal scale (R is stretched by 6%), so R and Z are calibrated separately.
 2. **Tracing.** Rays are cast outward from inside the plasma every 0.25°. The boundary point is the centre of the first boundary-coloured line each ray meets:
    - **EAST:** black.
    - **DIII-D:** the pink dashed 0.32 s line.
    - **NSTX-U:** the dark-purple separatrix line.
    - **WEST and SPARC:** red.
+   - **JET and JT-60U:** these panels draw nested black flux surfaces, plus an open line just outside the separatrix.
+     - **Which line:** the separatrix is the next line out after the closed surfaces (7 in JET, 9 in JT-60U). On each ray the tracer takes the line closest to the running median of those counts, so a surface hidden under a brown ripple contour or label doesn't shift the count.
+     - **Boundary point:** the inner edge of that line plus half its width.
+     - **Brown overlays:** brown dashes crossing a line are bridged.
    
    Rays are blocked beyond the X-points (so divertor legs are ignored) and on annotation arrows. Outliers are rejected against a running median.
 3. **X-points.** Each X-point is found by intersecting straight lines fitted to the two traced branches near the corner. The corner angles come out at 71–89°.
@@ -58,16 +65,17 @@ The previous NSTX-U shape (Pajares et al. 2025, t = 325 ms ramp-up, κ 1.73, 9.2
    Each piece is fitted with a least-squares cubic B-spline. Its smoothing is raised only until the piece's deepest inward dent is under 0.5 mm at real scale (5 µm on the model), so the outlines are convex to within print resolution.
    - **Fit error:** 1–3.2 mm RMS at real scale (≤ 0.03 mm on the model).
    - **Worst point:** under 14 mm (0.14 mm on the model) for every machine.
+   - **JET and JT-60U gaps:** near each X-point the line is hidden for a short stretch, by a ripple label in JET, or the rays don't reach it. There the fit runs straight to the X-point, matching the straight separatrix in the figure.
    - **NSTX-U X-point:** fixed at TokaMaker's printed value (0.615, −1.322) instead of being refined from the trace.
 5. **ITER and ARC** have no reference figure, so they use the parametric model from v2 (Miller form for the rounded half, conic arcs fitted to SPARC for the X-point halves). Those are then fitted the same way.
 
 ## Name lettering (`emboss_names_solidworks.ps1` + `Emboss.cs`, run in SolidWorks)
 - Arial Black capitals follow the top ring of the torus and read left to right when viewed from above.
-- Each letter has a flat top 0.8 mm (4 × 0.2 mm layers) above the highest surface point under it, so the letters finish on a single clean top layer.
+- Each letter has a flat top 0.8 mm (4 × 0.2 mm layers) above the higher of two heights: the surface under it, and the top of the plasma. So the letters finish on a single clean top layer, and above the plasma's top layer only the lettering remains (see the two-colour printing table below).
 - Letters extend straight down into the body and are merged with it, giving one solid body.
 - The text sits on the band of the top surface where the surface drops least across the letter height.
 - **SPARC and ARC:** these have an X-point ridge on top, so their text sits just outboard of the ridge.
-- **NSTX-U:** its crown ring is tiny (R ≈ 7.6 mm at 1:100), so its text is moved just outboard, to R = 10 mm. There the end letters turn about 42° instead of the name wrapping around the hole.
+- **NSTX-U:** its crown ring is tiny (R ≈ 7.6 mm at 1:100), so its text is moved just outboard, to R = 10 mm. There the end letters turn about 42° instead of the name wrapping around the hole. Its letter tops are set from the crown (11.19 mm + 0.8 mm), not from the slope under the text.
 
 | Machine | Cap height (mm) | Text radius (mm) | Letter-top Z (mm) | Max surface drop under text (mm) |
 |---|---|---|---|---|
@@ -77,9 +85,27 @@ The previous NSTX-U shape (Pajares et al. 2025, t = 325 ms ramp-up, κ 1.73, 9.2
 | SPARC  | 4   | 16.6 | 12.15 | 2.17 |
 | ITER   | 8   | 52.4 | 37.80 | 1.19 |
 | ARC    | 6   | 40.7 | 22.03 | 2.45 |
-| NSTX-U | 2.8 | 10.0 | 11.82 | 2.08 |
+| NSTX-U | 2.8 | 10.0 | 11.99 | 2.08 |
+| JET    | 5   | 28.4 | 16.12 | 0.57 |
+| JT-60U | 5   | 32.7 | 14.33 | 0.61 |
 
 Re-import check of `step_named/`: every file is 1 solid body with 0 geometry faults.
+
+**Two-colour lettering.** Everything above the plasma's top is lettering only. So add a filament change in the slicer at the first layer that starts at or above the height below. It takes 0.8 mm (4 layers at 0.2 mm) of letters in the second colour.
+- **Which column:** use "Upright print" when the whole model is printed on supports, and "Top half print" when it is cut at Z = 0 and only the upper half is printed.
+- **Measured from:** heights are from the bottom of the model. Add the raft height if you use one.
+
+| Machine | Upright print: change at (mm) | Top half print: change at (mm) | Letter tops: upright / top half (mm) |
+|---|---|---|---|
+| WEST   | 11.97 | 5.86  | 12.77 / 6.66  |
+| EAST   | 14.60 | 6.41  | 15.40 / 7.21  |
+| DIII-D | 20.82 | 9.67  | 21.62 / 10.47 |
+| SPARC  | 22.69 | 11.35 | 23.49 / 12.15 |
+| ITER   | 74.00 | 37.00 | 74.80 / 37.80 |
+| ARC    | 42.48 | 21.24 | 43.27 / 22.03 |
+| NSTX-U | 24.41 | 11.19 | 25.21 / 11.99 |
+| JET    | 30.03 | 15.32 | 30.83 / 16.12 |
+| JT-60U | 26.33 | 13.53 | 27.13 / 14.33 |
 
 Top-view renders are in `verification/<MACHINE>_named_topview.png`.
 
@@ -129,6 +155,8 @@ Verification overlay: `verification/WHAM_trace_vs_figure.png`.
 | ITER   | 1 | 6 | 0 | 808 588 | 808 590 |
 | ARC    | 1 | 8 | 0 | 202 277 | 202 249 |
 | NSTX-U | 1 | 6 | 0 | 11 311  | 11 312  |
+| JET    | 1 | 6 | 0 | 73 443  | 73 441  |
+| JT-60U | 1 | 6 | 0 | 68 691  | 68 681  |
 
 Analytic volume = 2π × (centroid R) × (cross-section area), at 1:100 (1 m³ real = 1000 mm³).
 
@@ -148,6 +176,7 @@ The NSTX-U model in this set is built from his equilibrium.
   - **Not re-run here:** the notebook needs the OFT install and `NSTXU_mesh.h5`.
   - **Previously used:** A. Pajares et al., Fus. Eng. Des. 220 (2025) 115302, t = 325 ms (`NSTXU_paper.pdf`).
 - WEST: "WEST machine capabilities for 2024" (CEA), p. 1 figure. (`WEST_paper.pdf`)
+- JET and JT-60U: P.C. de Vries et al., "Identity physics experiment on internal transport barriers in JT-60U and JET", Plasma Phys. Control. Fusion 51 (2009) 124050, Fig. 1, https://doi.org/10.1088/0741-3335/51/12/124050 (open access). (`JET_JT60U_paper.pdf`; figure at `../reference_figures/JET_JT60U_fig.png`)
 - SPARC: A.J. Creely et al., "Overview of the SPARC tokamak", J. Plasma Phys. 86 (2020) 865860502, Fig. 2.
 - ITER (separatrix κ 1.85, δ 0.49): ITER-FEAT design parameters, https://fire.pppl.gov/iter_feat_optimize.pdf
 - ARC V3A (R0 4.62, a 1.18, κsep 1.8, δsep 0.65): arXiv 2606.09359 (Table 1) and arXiv 2608.10124.

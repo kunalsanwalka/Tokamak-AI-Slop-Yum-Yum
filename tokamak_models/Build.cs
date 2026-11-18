@@ -427,13 +427,13 @@ public static class Build
             profiles.Add(pr);
         }
         // order for outputs
-        var order = new[] { "WEST", "EAST", "DIII-D", "SPARC", "ITER", "ARC", "NSTX-U" };
+        var order = new[] { "WEST", "EAST", "DIII-D", "SPARC", "ITER", "ARC", "NSTX-U", "JET", "JT-60U" };
         profiles.Sort((u, v) => Array.IndexOf(order, u.Name).CompareTo(Array.IndexOf(order, v.Name)));
 
         var rep = new StringBuilder();
         rep.AppendLine("Machine | R0 | a | kappa | dU | dL | X-points | area m2 | volume m3 | fit rms/max mm (real) | concave | STEP faces | mesh check");
         var csvAll = new StringBuilder("machine,R_m,Z_m,R_mm_1to100,Z_mm_1to100\n");
-        string[] colors = { "#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b", "#e377c2" };
+        string[] colors = { "#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b", "#e377c2", "#bcbd22", "#7f7f7f" };
         var svg = new StringBuilder(); double ppm = 100, W = 9.2 * ppm + 80, H = 9.0 * ppm + 60, ox = 50, oy = H / 2;
         SvgFrame(svg, W, H, ox, oy, ppm);
         for (int k = 0; k < profiles.Count; k++)

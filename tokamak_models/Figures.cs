@@ -59,6 +59,26 @@ public static class Figures
         sparc.Cx = 600.7; sparc.Cy = 459.25; sparc.YMin = 292; sparc.YMax = 626;
         sparc.XHints.Add(new double[] { 548, 296 }); sparc.XHints.Add(new double[] { 548, 622 });
         list.Add(sparc);
+
+        // JET and JT-60U: side-by-side panels of one figure (JET_JT60U_fig.png), black nested flux surfaces.
+        // Ticks: JET R 2/3/4/5 at x = 251/415/578/741.5 (163.45 px/m); JT-60U R 2/3/4/5 at x = 904/1067/1230/1393.5
+        // (163.15 px/m); Z 1/0/-1 at y = 196/350.5/504.5 (154.25 px/m) in both panels. NOT equal aspect: R and Z are
+        // calibrated separately. The separatrix is the Nth line crossed outward from the magnetic axis (JET: 7 closed
+        // surfaces inside it, JT-60U: 9); an open SOL line drawn just outside it is ignored by taking the Nth line's inner
+        // edge + half the 3 px line width. Brown TF-ripple contours/labels crossing the lines are bridged.
+        var jet = new Fig { Name = "JET", Path = d + "JET_JT60U_fig.png", Pred = "black", BridgePred = "brown", NthRun = 8, HalfWidthPx = 1.5,
+            Source = "de Vries et al. 2009, Plasma Phys. Control. Fusion 51 124050, Fig. 1 (JET)", Bx = 1 / 163.45, Bz = -1 / 154.25 };
+        jet.Ax = 3.5 - 496.4 * jet.Bx; jet.Az = 350.5 / 154.25;
+        jet.Cx = 417; jet.Cy = 320; jet.XMin = 145; jet.XMax = 735; jet.YMin = 50; jet.YMax = 583;
+        jet.XHints.Add(new double[] { 356, 578 });
+        list.Add(jet);
+
+        var jt = new Fig { Name = "JT-60U", Path = d + "JET_JT60U_fig.png", Pred = "black", NthRun = 10, HalfWidthPx = 1.5,
+            Source = "de Vries et al. 2009, Plasma Phys. Control. Fusion 51 124050, Fig. 1 (JT-60U)", Bx = 1 / 163.15, Bz = -1 / 154.25 };
+        jt.Ax = 3.5 - 1148.6 * jt.Bx; jt.Az = 350.5 / 154.25;
+        jt.Cx = 1139; jt.Cy = 320; jt.XMin = 800; jt.XMax = 1388; jt.YMin = 50; jt.YMax = 551;
+        jt.XHints.Add(new double[] { 1083, 547 });
+        list.Add(jt);
         return list;
     }
 }
