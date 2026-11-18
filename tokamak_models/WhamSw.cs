@@ -1,4 +1,5 @@
 // WHAM (Wisconsin HTS Axisymmetric Mirror) plasma at 1:100, built in SolidWorks from the traced profile.
+// Model files are written to mirror_models/ (with the other mirror machines); the CSV and trace check stay in tokamak_models/.
 //  1. step/WHAM_plasma_1to100.step + stl/WHAM_plasma_1to100.stl: the full solid of revolution, mirror axis along X.
 //  2. step_named/WHAM_plaque_named_1to100.step + stl_named/...: a printable plaque. The 1:100 plasma is only
 //     ~1.6 mm across at the centre and ~0.4 mm at the mirror throats, too thin to print or letter as a free
@@ -78,6 +79,8 @@ public static class WhamSw
     public static string Run(string root, bool visible)
     {
         string md = Path.Combine(root, "tokamak_models");
+        string mm = Path.Combine(root, "mirror_models");   // model files live with the other mirrors
+        foreach (var dir in new[] { "step", "stl", "step_named", "stl_named", "verification" }) Directory.CreateDirectory(Path.Combine(mm, dir));
         string png = Path.Combine(root, "reference_figures", "WHAM_fig.png");
         var log = new StringBuilder();
         WhamTrace.Prof prof; var s = WhamTrace.Fit(png, out prof);
@@ -116,8 +119,8 @@ public static class WhamSw
             var bb = Box(part, out n); double v = Vol(doc);
             log.AppendLine(string.Format(Inv, "full solid: revolve {0} | bodies={1} | box x {2:0.00}..{3:0.00} y {4:0.00}..{5:0.00} z {6:0.00}..{7:0.00} mm | volume {8:0.0} mm3 (analytic {9:0.0})",
                 f == null ? "FAILED" : "ok", n, bb[0], bb[3], bb[1], bb[4], bb[2], bb[5], v, vAnalytic));
-            doc.Extension.SaveAs(Path.Combine(md, "step", "WHAM_plasma_1to100.step"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
-            doc.Extension.SaveAs(Path.Combine(md, "stl", "WHAM_plasma_1to100.stl"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
+            doc.Extension.SaveAs(Path.Combine(mm, "step", "WHAM_plasma_1to100.step"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
+            doc.Extension.SaveAs(Path.Combine(mm, "stl", "WHAM_plasma_1to100.stl"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
             sw.CloseDoc(doc.GetTitle());
         }
 
@@ -182,12 +185,12 @@ public static class WhamSw
                 txt == null ? "FAILED" : "ok", n, bb[0], bb[3], bb[1], bb[4], bb[2], bb[5], vText, vText - vPlate));
 
             doc.ClearSelection2(true);
-            doc.Extension.SaveAs(Path.Combine(md, "step_named", "WHAM_plaque_named_1to100.step"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
-            doc.Extension.SaveAs(Path.Combine(md, "stl_named", "WHAM_plaque_named_1to100.stl"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
+            doc.Extension.SaveAs(Path.Combine(mm, "step_named", "WHAM_plaque_named_1to100.step"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
+            doc.Extension.SaveAs(Path.Combine(mm, "stl_named", "WHAM_plaque_named_1to100.stl"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
             doc.ShowNamedView2(side > 0 ? "*Front" : "*Back", -1); doc.ViewZoomtofit2();
-            doc.Extension.SaveAs(Path.Combine(md, "verification", "WHAM_named_topview.png"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
+            doc.Extension.SaveAs(Path.Combine(mm, "verification", "WHAM_named_topview.png"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
             doc.ShowNamedView2("*Isometric", -1); doc.ViewZoomtofit2();
-            doc.Extension.SaveAs(Path.Combine(md, "verification", "WHAM_named_isoview.png"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
+            doc.Extension.SaveAs(Path.Combine(mm, "verification", "WHAM_named_isoview.png"), 0, (int)swSaveAsOptions_e.swSaveAsOptions_Silent, null, ref err, ref warn);
             sw.CloseDoc(doc.GetTitle());
         }
         sw.ExitApp();

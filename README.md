@@ -1,6 +1,6 @@
 # Tokamak plasma shapes, 1:100
 
-Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 9 tokamaks, plus the WHAM magnetic mirror, at 1:100 scale: 1 m on the real machine = 10 mm on the model. All STEP and STL files are in millimetres. WHAM is described in its own section below.
+Plasma cross-sections (last closed flux surface, i.e. the separatrix) of 9 tokamaks, plus five magnetic mirrors (WHAM, 2XIIB, GAMMA 10, GDT, TMX-U), at 1:100 scale: 1 m on the real machine = 10 mm on the model. All STEP and STL files are in millimetres. The tokamak models are in `tokamak_models/`; all the mirror models, and their own comparison drawing `comparison_mirrors.svg`, are in `mirror_models/` and are described in their own sections below.
 
 ## Shapes
 
@@ -132,7 +132,7 @@ Verification overlay: `verification/WHAM_trace_vs_figure.png`.
 | Total length (end wall to end wall) | 4.14 m | 41.4 mm |
 | Plasma volume | 0.133 m³ | 132.6 mm³ |
 
-**Files.**
+**Files** (in `mirror_models/`, with the other mirrors; the CSV and trace overlay stay in `tokamak_models/`).
 - **`step/WHAM_plasma_1to100.step` and `stl/WHAM_plasma_1to100.stl`:** the full 1:100 solid of revolution.
   - **Orientation:** the mirror axis is along X and the centre is at the origin.
   - **Check:** 1 solid, 0 faults; the volume matches the analytic π∫r² dz.
@@ -144,6 +144,48 @@ Verification overlay: `verification/WHAM_trace_vs_figure.png`.
   - **Printing:** print it flat, base down, with no supports.
   - **Renders:** `verification/WHAM_named_topview.png` and `verification/WHAM_named_isoview.png`.
 - **`comparison_cross_sections.svg`:** WHAM is drawn at the same scale, lying on its side below the small tokamaks. Run the WHAM script after `Build.Run` to put it back after regenerating.
+
+## Other mirrors: 2XIIB, GAMMA 10, GDT, TMX-U (`build_mirror_plaques_solidworks.ps1` + `MirrorSw.cs`)
+**Source.** 1:100 flux-surface solids made by **Elliot Claveau**, in `mirror_models/step_raw/` (unchanged; GAMMA 10 is his corrected version of 18 Nov 2026). They are in mm, with the mirror axis along Z and the centre at the origin. Each imports into SolidWorks as 1 solid with 0 faults.
+
+| Machine | Length (real / 1:100) | Largest radius (real / 1:100) | Plasma volume (real / 1:100) | Symmetry |
+|---|---|---|---|---|
+| 2XIIB | 6.28 m / 62.8 mm | 0.67 m / 6.7 mm | 0.195 m³ / 194.6 mm³ | quadrupole (min-B) throughout |
+| GAMMA 10 | 21.3 m / 213.4 mm | 0.65 m / 6.5 mm | 1.114 m³ / 1113.6 mm³ | axisymmetric central cell, quadrupole anchors |
+| GDT | 9.9 m / 99.0 mm | 0.23 m / 2.3 mm | 0.538 m³ / 538.1 mm³ | axisymmetric |
+| TMX-U | 19.8 m / 198.0 mm | 2.50 m / 25.0 mm | 5.88 m³ / 5882.8 mm³ | axisymmetric central cell, quadrupole end cells and fans |
+
+**How the plaques are made** (same form as the WHAM plaque):
+- **Halving:** each solid is cut on its x = 0 plane, keeping x ≥ 0. That plane contains the axis, and it is a mirror-symmetry plane for all four machines, including the quadrupole sections. So the cut gives a true half (the kept volume is 0.500 of the full volume for every machine), with a flat face that sits on the plate.
+- **Base and name:** a 2 mm plate, with the name raised 0.8 mm in 5 mm Arial Black. The name is centred under the middle of the machine, 2.1 mm clear of the relief.
+- **What the quadrupole sections look like:** the plasma there is a thin ellipse that turns 90° from one section to the next. On the plaque, a section whose ellipse is wide in y lies flat as a sheet; one whose ellipse is wide in x stands up as a fin. In 2XIIB the two ends are one of each.
+
+**Thickening to 0.8 mm (for a 0.4 mm nozzle; `MirrorThin.cs`).** At 1:100 parts of these plasmas are far too thin to print: down to 0.08 mm tall sheets and 0.15 mm wide fins in 2XIIB, 0.11 / 0.21 mm in GAMMA 10, 0.20 / 0.40 mm in TMX-U, and GDT's throats are only 0.26 mm in radius. So before halving, every part of the relief is brought up to at least 0.8 mm tall and 0.8 mm wide (two nozzle widths):
+- **Finding the thin parts:** the solid is sliced every 0.25 mm along the axis (from its STL). At each slice the plaque relief is a = max x tall and 2b = 2 max |y| wide.
+- **Thickening:** over each thin stretch (plus 1 mm either side), the real cross-section is stretched only in its thin direction: by 0.85 / a across the plate and 0.85 / 2b along it, aiming at 0.85 mm so the result stays above 0.8 between sections. In directions that are already thick enough it is shrunk to 85%, so it stays inside the real surface. These sections, every 1 mm, are lofted piece by piece and merged into the solid. So the shape is unchanged wherever it was already printable, and thin sheets and fins keep their outline but get thicker.
+- **Seam at z = 0:** the solids are made of two halves meeting at z = 0, and SolidWorks won't merge a loft across it. So the 2XIIB thickening, the only one that crosses the centre, stops at z = 0 and restarts 0.001 mm past it. That 1 µm sliver is far below what a printer or slicer can resolve.
+- **Result** (re-sliced after thickening): see the table below. The full-solid STLs in `stl/` are the true, unthickened shapes.
+- WHAM's plaque is not thickened: its 0.2 mm-radius throats (2.3 mm long) are still 0.2 mm tall and 0.4 mm wide.
+
+| Plaque (`step_named/` + `stl_named/<tag>_plaque_named_1to100`) | Plate (mm) | Relief height (mm) | Thinnest before → after thickening, height / width (mm) | Plasma volume, true → thickened (mm³) | Plaque volume (mm³) | Check |
+|---|---|---|---|---|---|---|
+| 2XIIB | 69.4 × 22.0 × 2 | 6.7 | 0.08 / 0.15 → 0.82 / 0.85 | 194.6 → 533.9 | 3371 | 1 solid, 0 faults |
+| GAMMA10 | 220.0 × 19.4 × 2 | 6.4 | 0.11 / 0.21 → 0.85 / 0.85 | 1113.6 → 1483.9 | 9351 | 1 solid, 0 faults |
+| GDT | 105.6 × 14.9 × 2 | 2.3 | 0.26 / 0.52 → 0.84 / 0.85 | 538.1 → 544.8 | 3460 | 1 solid, 0 faults |
+| TMX-U | 204.6 × 54.6 × 2 | 25.0 | 0.20 / 0.40 → 0.85 / 0.85 | 5882.8 → 6070.4 | 25 424 | 1 solid, 0 faults |
+
+2XIIB and GAMMA 10 gain the most volume because so much of them is thin sheets and fins: the plaque reliefs are true in outline, but their thin parts are thicker than the real plasma.
+
+Other files: the full (true, unthickened) solids as STL in `stl/<tag>_plasma_1to100.stl`, and renders in `verification/<tag>_named_topview.png` and `_isoview.png`.
+
+**Printing:** print flat, base down, with a 0.4 mm nozzle. TMX-U's tall end fin (25 mm high, about 6 mm thick at its base) may want a brim. The GAMMA 10 plaque is 220 mm long, so it needs a 220 mm bed, or a diagonal placement on a smaller one.
+
+## Mirror comparison (`mirror_models/comparison_mirrors.svg`, `MirrorSvg.cs`)
+All five mirrors at true scale (same scale along and across, 50 px per metre), stacked on a shared axial scale centred on each machine. Each outline is what its plaque shows from above:
+- **WHAM and GDT:** the radial profile.
+- **2XIIB, GAMMA 10 and TMX-U:** the plasma's extent across the plate (in y) at each axial position, sliced every 1 cm. The quadrupole sections show as wide sheets or narrow necks, depending on which way their ellipse points.
+
+The outlines are of the true flux surfaces, not the thickened reliefs; thickening changes widths by at most about 4 cm real, less than 2 px. Ends run as on the plaques (TMX-U's wide fan on the right). It is redrawn at the end of every `build_mirror_plaques_solidworks.ps1` run.
 
 ## STEP validation (SolidWorks import, `check_step_solidworks.ps1`)
 | File | Solid bodies | Faces | Check faults | Volume in SolidWorks (mm³) | Analytic (mm³) |
@@ -167,6 +209,8 @@ Many thanks to **Matthew Parsons** for providing the correct NSTX-U plasma shape
 
 The NSTX-U model in this set is built from his equilibrium.
 
+Many thanks to **Elliot Claveau** for the original 1:100 flux-surface STEP files of 2XIIB, GAMMA 10, GDT and TMX-U (`mirror_models/step_raw/`), from which those four mirror plaques are made.
+
 ## Sources
 - EAST: Y.-Y. Chen et al., "Plasma shape optimization for EAST tokamak using orthogonal method", Chin. Phys. B 28 (2019) 015201, Fig. 1. (`EAST_paper.pdf`)
 - DIII-D: G.L. Jackson et al., "Simulating ITER plasma startup and rampdown scenarios in the DIII-D tokamak", Nucl. Fusion 49 (2009) 115027, Fig. 1(b), 0.32 s. (`DIIID_paper.pdf`)
@@ -181,6 +225,7 @@ The NSTX-U model in this set is built from his equilibrium.
 - ITER (separatrix κ 1.85, δ 0.49): ITER-FEAT design parameters, https://fire.pppl.gov/iter_feat_optimize.pdf
 - ARC V3A (R0 4.62, a 1.18, κsep 1.8, δsep 0.65): arXiv 2606.09359 (Table 1) and arXiv 2608.10124.
 - WHAM: D. Endrizzi et al., "Physics basis for the Wisconsin HTS Axisymmetric Mirror (WHAM)", J. Plasma Phys. 89 (2023) 975890501, Fig. 2.
+- 2XIIB, GAMMA 10, GDT, TMX-U: flux-surface solids by Elliot Claveau (`mirror_models/step_raw/*_flux_surface_1to100.step`).
 
 ## Regenerating
 From the `Tokamak Comparison` folder, in Windows PowerShell:
@@ -192,4 +237,6 @@ Add-Type -Path tokamak_models\TokamakGen.cs,tokamak_models\Trace.cs,tokamak_mode
 
 `tokamak_models\emboss_names_solidworks.ps1` re-letters every machine; add `-Only NSTX-U` to re-letter one.
 
-`tokamak_models\build_wham_solidworks.ps1` re-traces WHAM, rebuilds its solid and plaque in SolidWorks, and adds it to the SVG.
+`tokamak_models\build_wham_solidworks.ps1` re-traces WHAM, rebuilds its solid and plaque in SolidWorks (written to `mirror_models/`), and adds it to the SVG.
+
+`tokamak_models\build_mirror_plaques_solidworks.ps1` rebuilds the 2XIIB, GAMMA 10, GDT and TMX-U plaques from `mirror_models/step_raw/` (thickened to 0.8 mm) and redraws `mirror_models/comparison_mirrors.svg`; add `-Only GDT` (or `2XIIB`, `GAMMA10`, `TMX-U`) to rebuild one. 2XIIB and GAMMA 10 take several minutes each.
